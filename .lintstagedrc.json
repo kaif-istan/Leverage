@@ -1,9 +1,9 @@
 {
   "*.{ts,tsx}": [
     "eslint --fix",
-    "prettier --write"
+    "prettier --write",
+    "bash -c \"pnpm typecheck\"",
+    "pnpm --filter @job-hunter/api test --findRelatedTests --passWithNoTests"
   ],
-  "*.{json,md,css}": [
-    "prettier --write"
-  ]
+  "*.{json,md,css}": ["prettier --write"]
 }
