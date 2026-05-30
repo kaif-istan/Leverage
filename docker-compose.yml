@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # PostgreSQL + pgvector
+  postgres:
+    image: pgvector/pgvector:0.7.0-pg16
+    container_name: jobhunter-postgres
+    ports:
+      - '${DATABASE_PORT:-5432}:5432'
+    environment:
+      POSTGRES_USER: ${DATABASE_USER:-jobhunter}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-jobhunter}
+      POSTGRES_DB: ${DATABASE_NAME:-jobhunter}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-jobhunter} -d ${DATABASE_NAME:-jobhunter}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - jobhunter-network
+
+  # Redis
+  redis:
+    image: redis:7.2-alpine
+    container_name: jobhunter-redis
+    ports:
+      - '6379:6379'
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redispassword}
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redispassword}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - jobhunter-network
+
+  # Ollama for local embeddings
+  ollama:
+    image: ollama/ollama:latest
+    container_name: jobhunter-ollama
+    ports:
+      - '11434:11434'
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - jobhunter-network
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: jobhunter-prometheus
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - jobhunter-network
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: jobhunter-grafana
+    ports:
+      - '3002:3000'
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - jobhunter-network
+
+networks:
+  jobhunter-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
+  ollama-data:
+  prometheus-data:
+  grafana-data:
