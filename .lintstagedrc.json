@@ -7,7 +7,7 @@
   "packages/shared/src/**/*.ts": ["prettier --write"],
   "*.{ts,tsx}": [
     "bash -c \"pnpm typecheck\"",
-    "pnpm --filter @job-hunter/api test --findRelatedTests --passWithNoTests"
+    "pnpm --filter @job-hunter/api test --findRelatedTests --passWithNoTests --coverage"
   ],
   "*.{json,md,css}": ["prettier --write"]
 }
