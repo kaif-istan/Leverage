@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Building, RefreshCw, Zap, Plus, Search, ShieldCheck, HelpCircle } from 'lucide-react'
+import {
+  ArrowLeft,
+  Building,
+  RefreshCw,
+  Zap,
+  Plus,
+  Search,
+  ShieldCheck,
+  HelpCircle,
+} from 'lucide-react'
 import api from '@/lib/api'
 
 export default function CompaniesSettingsPage() {
@@ -13,6 +22,7 @@ export default function CompaniesSettingsPage() {
   const [newCompanyUrl, setNewCompanyUrl] = useState('')
   const [probing, setProbing] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [scrapingMap, setScrapingMap] = useState<Record<string, boolean>>({})
 
   const fetchStatsAndCompanies = async () => {
     setLoading(true)
@@ -80,18 +90,47 @@ export default function CompaniesSettingsPage() {
     }
   }
 
+  const handleScrape = async (companyId: string, name: string) => {
+    setScrapingMap((prev) => ({ ...prev, [companyId]: true }))
+    setMessage(null)
+
+    try {
+      await api.post(`/jobs/scrape/${companyId}`, {})
+      setMessage({
+        type: 'success',
+        text: `🎉 Successfully crawled and synced active job listings for ${name}!`,
+      })
+      // Refresh the stats too
+      const statsData: any = await api.get('/companies/stats')
+      setStats(statsData || null)
+    } catch (err: any) {
+      console.error(err)
+      setMessage({
+        type: 'error',
+        text: err.message || `Failed to sync jobs for ${name}.`,
+      })
+    } finally {
+      setScrapingMap((prev) => ({ ...prev, [companyId]: false }))
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col relative overflow-hidden">
       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Header */}
       <header className="sticky top-0 z-50 glass border-b border-white/5 py-4 px-6 md:px-12 flex justify-between items-center">
-        <Link href="/jobs" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-semibold">
+        <Link
+          href="/jobs"
+          className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-semibold"
+        >
           <ArrowLeft className="h-4 w-4" /> Back to Job Board
         </Link>
         <div className="flex items-center gap-3">
           <Zap className="h-5 w-5 text-primary" />
-          <span className="text-lg font-bold font-display tracking-tight text-white">AI JOB HUNTER</span>
+          <span className="text-lg font-bold font-display tracking-tight text-white">
+            AI JOB HUNTER
+          </span>
         </div>
       </header>
 
@@ -102,7 +141,8 @@ export default function CompaniesSettingsPage() {
           <div className="glass p-6 rounded-2xl border border-white/5 flex flex-col gap-4">
             <h2 className="text-xl font-bold font-display text-white">Add Monitored Company</h2>
             <p className="text-slate-400 text-xs leading-relaxed">
-              Input any tech company. Our verification service will probe Greenhouse, Lever, and Ashby endpoints in real-time, register their slugs, and pull their job postings.
+              Input any tech company. Our verification service will probe Greenhouse, Lever, and
+              Ashby endpoints in real-time, register their slugs, and pull their job postings.
             </p>
 
             {message && (
@@ -119,7 +159,9 @@ export default function CompaniesSettingsPage() {
 
             <form onSubmit={handleManualAdd} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Company Name</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  Company Name
+                </label>
                 <input
                   type="text"
                   required
@@ -131,7 +173,9 @@ export default function CompaniesSettingsPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Website URL (Optional)</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  Website URL (Optional)
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. linear.app"
@@ -161,7 +205,8 @@ export default function CompaniesSettingsPage() {
           <div className="glass p-6 rounded-2xl border border-white/5 flex flex-col gap-4">
             <h2 className="text-xl font-bold font-display text-white">Platform Scan Triggers</h2>
             <p className="text-slate-400 text-xs">
-              Manually trigger background scrapers to discover startups from public directories and enqueue them for slug probing.
+              Manually trigger background scrapers to discover startups from public directories and
+              enqueue them for slug probing.
             </p>
             <div className="grid grid-cols-2 gap-4">
               <button
@@ -186,19 +231,27 @@ export default function CompaniesSettingsPage() {
           {stats && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="glass p-4 rounded-2xl border border-white/5 flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Verified Active</span>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                  Verified Active
+                </span>
                 <span className="text-2xl font-bold text-white">{stats.monitoredCount}</span>
               </div>
               <div className="glass p-4 rounded-2xl border border-white/5 flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Queue Total</span>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                  Queue Total
+                </span>
                 <span className="text-2xl font-bold text-white">{stats.queue.total}</span>
               </div>
               <div className="glass p-4 rounded-2xl border border-white/5 flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Queue Confirmed</span>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                  Queue Confirmed
+                </span>
                 <span className="text-2xl font-bold text-emerald-400">{stats.queue.confirmed}</span>
               </div>
               <div className="glass p-4 rounded-2xl border border-white/5 flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Queue Pending</span>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                  Queue Pending
+                </span>
                 <span className="text-2xl font-bold text-indigo-400">{stats.queue.pending}</span>
               </div>
             </div>
@@ -206,8 +259,10 @@ export default function CompaniesSettingsPage() {
 
           {/* Companies List */}
           <div className="glass p-6 rounded-3xl border border-white/5 flex-1 flex flex-col gap-4">
-            <h2 className="text-2xl font-bold font-display text-white">Monitored Startup Directory</h2>
-            
+            <h2 className="text-2xl font-bold font-display text-white">
+              Monitored Startup Directory
+            </h2>
+
             {loading ? (
               <div className="flex flex-col gap-3 py-6">
                 {[...Array(3)].map((_, i) => (
@@ -237,10 +292,20 @@ export default function CompaniesSettingsPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded flex items-center gap-1">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded flex items-center gap-1">
                         <ShieldCheck className="h-3 w-3" /> Monitored
                       </span>
+                      <button
+                        onClick={() => handleScrape(c.id, c.name)}
+                        disabled={scrapingMap[c.id]}
+                        className="bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/30 text-slate-300 hover:text-white font-semibold py-1.5 px-3 rounded-lg text-xs transition-all flex items-center gap-1.5 disabled:opacity-50"
+                      >
+                        <RefreshCw
+                          className={`h-3 w-3 ${scrapingMap[c.id] ? 'animate-spin text-primary' : ''}`}
+                        />
+                        {scrapingMap[c.id] ? 'Syncing...' : 'Sync Jobs'}
+                      </button>
                     </div>
                   </div>
                 ))}

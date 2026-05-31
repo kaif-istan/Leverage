@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, UseGuards, HttpCode, HttpStatus, Inject } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  Inject,
+} from '@nestjs/common'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { DRIZZLE_TOKEN, type DrizzleDB } from '../../database/database.module'
 import { companies, discoveredCompaniesQueue } from '../../database/schema'
@@ -23,23 +32,18 @@ export class CompanyDiscoveryController {
   constructor(
     @Inject(DRIZZLE_TOKEN) private readonly db: DrizzleDB,
     private readonly probeService: PlatformProbeService,
-    private readonly orchestrator: CompanyDiscoveryOrchestrator
+    private readonly orchestrator: CompanyDiscoveryOrchestrator,
   ) {}
 
   @Get()
   async getMonitoredCompanies() {
-    const list = await this.db
-      .select()
-      .from(companies)
-      .orderBy(desc(companies.createdAt))
+    const list = await this.db.select().from(companies).orderBy(desc(companies.createdAt))
     return list
   }
 
   @Get('stats')
   async getStats() {
-    const [compCount] = await this.db
-      .select({ count: sql<number>`count(*)` })
-      .from(companies)
+    const [compCount] = await this.db.select({ count: sql<number>`count(*)` }).from(companies)
 
     const [queueStats] = await this.db
       .select({
@@ -90,15 +94,16 @@ export class CompanyDiscoveryController {
         probeLastAttemptedAt: new Date(),
       })
       .onConflictDoUpdate({
-        target: companies.atsSlug,
+        target: companies.slug,
         set: {
           atsPlatform: result.platform,
+          atsSlug: result.slug,
           atsVerifiedAt: new Date(),
           isMonitored: true,
           monitoringEnabledAt: new Date(),
           probeStatus: 'confirmed',
           probeLastAttemptedAt: new Date(),
-        }
+        },
       })
       .returning()
 

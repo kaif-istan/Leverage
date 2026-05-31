@@ -17,7 +17,7 @@ export class ScraperOrchestrator {
     private readonly greenhouse: GreenhouseAdapter,
     private readonly lever: LeverAdapter,
     private readonly ashby: AshbyAdapter,
-    private readonly ingestion: IngestionService
+    private readonly ingestion: IngestionService,
   ) {}
 
   /**
@@ -28,10 +28,7 @@ export class ScraperOrchestrator {
   async runAllScrapers() {
     this.logger.log('Starting scheduled job scrape cycles across monitored companies...')
 
-    const monitored = await this.db
-      .select()
-      .from(companies)
-      .where(eq(companies.isMonitored, true))
+    const monitored = await this.db.select().from(companies).where(eq(companies.isMonitored, true))
 
     this.logger.log(`Found ${monitored.length} companies to scrape.`)
 
@@ -53,12 +50,20 @@ export class ScraperOrchestrator {
       .where(eq(companies.id, companyId))
       .limit(1)
 
-    if (!company || !company.atsSlug) {
-      this.logger.warn(`Could not scrape company ${companyId}: Not found or missing ATS slug.`)
+    if (!company) {
+      this.logger.warn(`Could not scrape company ${companyId}: Not found.`)
       return
     }
 
-    this.logger.log(`Starting scrape for ${company.name} (${company.atsPlatform}) using slug: ${company.atsSlug}`)
+    const atsSlug = company.atsSlug || company.slug
+    if (!atsSlug) {
+      this.logger.warn(`Could not scrape company ${companyId}: Missing ATS slug.`)
+      return
+    }
+
+    this.logger.log(
+      `Starting scrape for ${company.name} (${company.atsPlatform}) using slug: ${atsSlug}`,
+    )
 
     // Create or find default jobSource for the ATS platform
     let [source] = await this.db
@@ -73,11 +78,12 @@ export class ScraperOrchestrator {
         .values({
           name: `${company.atsPlatform} API Source`,
           displayName: `${company.atsPlatform} Engine`,
-          baseUrl: company.atsPlatform === 'greenhouse'
-            ? 'https://boards-api.greenhouse.io/v1'
-            : company.atsPlatform === 'lever'
-            ? 'https://api.lever.co/v0'
-            : 'https://api.ashbyhq.com/v1',
+          baseUrl:
+            company.atsPlatform === 'greenhouse'
+              ? 'https://boards-api.greenhouse.io/v1'
+              : company.atsPlatform === 'lever'
+                ? 'https://api.lever.co/v0'
+                : 'https://api.ashbyhq.com/v1',
           adapterType: company.atsPlatform as any,
           isEnabled: true,
         })
@@ -96,11 +102,11 @@ export class ScraperOrchestrator {
       let crawledJobs: any[] = []
 
       if (company.atsPlatform === 'greenhouse') {
-        crawledJobs = await this.greenhouse.fetchJobs(company.atsSlug)
+        crawledJobs = await this.greenhouse.fetchJobs(atsSlug)
       } else if (company.atsPlatform === 'lever') {
-        crawledJobs = await this.lever.fetchJobs(company.atsSlug)
+        crawledJobs = await this.lever.fetchJobs(atsSlug)
       } else if (company.atsPlatform === 'ashby') {
-        crawledJobs = await this.ashby.fetchJobs(company.atsSlug)
+        crawledJobs = await this.ashby.fetchJobs(atsSlug)
       }
 
       this.logger.log(`Processing ${crawledJobs.length} crawled roles for ${company.name}`)

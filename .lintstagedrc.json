@@ -1,7 +1,11 @@
 {
+  "apps/api/src/**/*.ts": ["pnpm --filter @job-hunter/api exec eslint --fix", "prettier --write"],
+  "apps/web/src/**/*.{ts,tsx}": [
+    "pnpm --filter @job-hunter/web exec next lint --fix --file",
+    "prettier --write"
+  ],
+  "packages/shared/src/**/*.ts": ["prettier --write"],
   "*.{ts,tsx}": [
-    "eslint --fix",
-    "prettier --write",
     "bash -c \"pnpm typecheck\"",
     "pnpm --filter @job-hunter/api test --findRelatedTests --passWithNoTests"
   ],

@@ -26,7 +26,7 @@ async function runSeed() {
     const companiesData = JSON.parse(rawData)
 
     console.log(`Inserting ${companiesData.length} companies...`)
-    
+
     for (const company of companiesData) {
       await db
         .insert(companies)
@@ -34,6 +34,7 @@ async function runSeed() {
           name: company.name,
           slug: company.slug,
           atsPlatform: company.atsPlatform || 'unknown',
+          atsSlug: company.slug, // Seed atsSlug too!
           discoverySource: 'manual_seed',
         })
         .onConflictDoNothing()

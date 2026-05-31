@@ -23,7 +23,20 @@ export class PlatformProbeService {
     candidates.add(withNoSpaces)
 
     // Common strip-off suffixes
-    const suffixes = ['-inc', 'inc', '-ltd', 'ltd', '-co', 'co', '-corp', 'corp', '-software', 'software', '-tech', 'tech']
+    const suffixes = [
+      '-inc',
+      'inc',
+      '-ltd',
+      'ltd',
+      '-co',
+      'co',
+      '-corp',
+      'corp',
+      '-software',
+      'software',
+      '-tech',
+      'tech',
+    ]
     for (const s of suffixes) {
       if (withHyphens.endsWith(s)) {
         candidates.add(withHyphens.slice(0, -s.length).replace(/-$/, ''))
@@ -42,7 +55,7 @@ export class PlatformProbeService {
    */
   async probe(
     name: string,
-    websiteUrl?: string
+    websiteUrl?: string,
   ): Promise<{ platform: AtsPlatform; slug: string } | null> {
     const candidates = this.generateSlugCandidates(name)
     this.logger.log(`Probing slug candidates for ${name}: ${candidates.join(', ')}`)
@@ -88,7 +101,7 @@ export class PlatformProbeService {
 
     try {
       // Ashby
-      const ashbyRes = await axios.head(`https://jobs.ashbyhq.com/${slug}`, {
+      const ashbyRes = await axios.head(`https://api.ashbyhq.com/posting-api/job-board/${slug}`, {
         validateStatus: (status: number) => status === 200,
         timeout: 4000,
       })
@@ -100,10 +113,15 @@ export class PlatformProbeService {
     return null
   }
 
-  private async crawlCareerPage(url: string): Promise<{ platform: AtsPlatform; slug: string } | null> {
+  private async crawlCareerPage(
+    url: string,
+  ): Promise<{ platform: AtsPlatform; slug: string } | null> {
     try {
       const targetUrl = url.startsWith('http') ? url : `https://${url}`
-      const response = await axios.get(targetUrl, { timeout: 8000, headers: { 'User-Agent': 'Mozilla/5.0' } })
+      const response = await axios.get(targetUrl, {
+        timeout: 8000,
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+      })
       const html = response.data
 
       if (typeof html !== 'string') return null

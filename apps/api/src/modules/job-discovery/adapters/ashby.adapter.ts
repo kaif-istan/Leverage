@@ -11,7 +11,7 @@ export class AshbyAdapter {
    */
   async fetchJobs(slug: string): Promise<CrawledJob[]> {
     this.logger.log(`Fetching jobs from Ashby for slug: ${slug}`)
-    const url = `https://api.ashbyhq.com/v1/iframe/${slug}/jobs`
+    const url = `https://api.ashbyhq.com/posting-api/job-board/${slug}`
 
     try {
       const response = await axios.get(url, { timeout: 10000 })

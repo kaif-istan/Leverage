@@ -3,7 +3,17 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Briefcase, Building, Zap, Compass, Star, User, LogOut, CheckCircle, ShieldAlert } from 'lucide-react'
+import {
+  Briefcase,
+  Building,
+  Zap,
+  Compass,
+  Star,
+  User,
+  LogOut,
+  CheckCircle,
+  ShieldAlert,
+} from 'lucide-react'
 
 export default function Home() {
   const router = useRouter()
@@ -47,6 +57,22 @@ export default function Home() {
           </span>
         </div>
         <nav className="flex items-center gap-6">
+          {user && (
+            <>
+              <Link
+                href="/jobs"
+                className="text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                Discover
+              </Link>
+              <Link
+                href="/settings/companies"
+                className="text-slate-400 hover:text-white transition-colors text-sm font-medium"
+              >
+                Monitored Startups
+              </Link>
+            </>
+          )}
           {user ? (
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
@@ -84,12 +110,27 @@ export default function Home() {
             Your Personal AI <br className="hidden md:inline" /> Job Hunting Agent
           </h1>
           <p className="text-slate-400 text-lg md:text-xl leading-relaxed">
-            Automatically discover, rank, analyze, track, and tailor job applications. Powered by Llama embeddings, Drizzle database schemas, and intelligent crawlers.
+            Automatically discover, rank, analyze, track, and tailor job applications. Powered by
+            Llama embeddings, Drizzle database schemas, and intelligent crawlers.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mt-4 w-full sm:w-auto">
             {user ? (
-              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-6 py-3.5 rounded-xl font-medium flex items-center gap-2">
-                <CheckCircle className="h-5 w-5" /> Authenticated & Connected to API
+              <div className="flex flex-col sm:flex-row gap-4 items-center justify-center w-full">
+                <Link
+                  href="/jobs"
+                  className="bg-primary hover:bg-primary/95 text-white font-medium px-8 py-4 rounded-xl transition-all shadow-xl shadow-primary/25 hover:shadow-primary/40 text-center flex items-center justify-center gap-2"
+                >
+                  <Briefcase className="h-5 w-5" /> Go to Job Board
+                </Link>
+                <Link
+                  href="/settings/companies"
+                  className="bg-white/5 hover:bg-white/10 border border-white/10 font-medium px-8 py-4 rounded-xl transition-all text-center flex items-center justify-center gap-2 text-white"
+                >
+                  <Building className="h-5 w-5" /> Monitored Startups
+                </Link>
+                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-6 py-4 rounded-xl font-medium flex items-center justify-center gap-2">
+                  <CheckCircle className="h-5 w-5" /> Connected to API
+                </div>
               </div>
             ) : (
               <>
@@ -118,7 +159,8 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-bold font-display">Multi-ATS Crawling</h3>
             <p className="text-slate-400 text-sm leading-relaxed">
-              Integrations for Lever, Ashby, and Greenhouse APIs. Seamless slug discovery directly from YC, Wellfound, and GitHub trends.
+              Integrations for Lever, Ashby, and Greenhouse APIs. Seamless slug discovery directly
+              from YC, Wellfound, and GitHub trends.
             </p>
           </div>
 
@@ -128,7 +170,8 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-bold font-display">Embedding Scoring</h3>
             <p className="text-slate-400 text-sm leading-relaxed">
-              6-signal composite ranking algorithm utilizing Ollama local nomic-embed-text embeddings for completely free intelligence matching.
+              6-signal composite ranking algorithm utilizing Ollama local nomic-embed-text
+              embeddings for completely free intelligence matching.
             </p>
           </div>
 
@@ -138,7 +181,8 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-bold font-display">Resume Tailoring</h3>
             <p className="text-slate-400 text-sm leading-relaxed">
-              Dynamically tailors your resumes, highlights custom skills, drafts ultra-personalized cover letters, and logs history.
+              Dynamically tailors your resumes, highlights custom skills, drafts ultra-personalized
+              cover letters, and logs history.
             </p>
           </div>
         </section>
