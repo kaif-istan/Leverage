@@ -27,7 +27,7 @@ import ollamaConfig from './config/ollama.config'
         path.resolve(__dirname, '../../../.env.local'),
         path.resolve(__dirname, '../../../.env'),
         '.env.local',
-        '.env'
+        '.env',
       ],
     }),
 

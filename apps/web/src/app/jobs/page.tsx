@@ -2,7 +2,18 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Briefcase, MapPin, Compass, Search, Filter, RefreshCw, Zap, ExternalLink, Calendar, ChevronRight } from 'lucide-react'
+import {
+  Briefcase,
+  MapPin,
+  Compass,
+  Search,
+  Filter,
+  RefreshCw,
+  Zap,
+  ExternalLink,
+  Calendar,
+  ChevronRight,
+} from 'lucide-react'
 import api from '@/lib/api'
 
 export default function JobsPage() {
@@ -54,7 +65,10 @@ export default function JobsPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 glass border-b border-white/5 py-4 px-6 md:px-12 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <Link href="/" className="bg-primary/20 p-2.5 rounded-xl border border-primary/30 flex items-center justify-center">
+          <Link
+            href="/"
+            className="bg-primary/20 p-2.5 rounded-xl border border-primary/30 flex items-center justify-center"
+          >
             <Zap className="h-5 w-5 text-primary" />
           </Link>
           <span className="text-lg font-bold tracking-tight font-display bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
@@ -65,10 +79,16 @@ export default function JobsPage() {
           <Link href="/jobs" className="text-primary font-semibold text-sm">
             Discover
           </Link>
-          <Link href="/settings/companies" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">
+          <Link
+            href="/settings/companies"
+            className="text-slate-400 hover:text-white transition-colors text-sm font-medium"
+          >
             Monitored Startups
           </Link>
-          <Link href="/" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">
+          <Link
+            href="/"
+            className="text-slate-400 hover:text-white transition-colors text-sm font-medium"
+          >
             Home
           </Link>
         </nav>
@@ -91,7 +111,10 @@ export default function JobsPage() {
         </div>
 
         {/* Filter bar */}
-        <form onSubmit={handleSearchSubmit} className="glass p-5 rounded-2xl border border-white/5 flex flex-col md:flex-row gap-4 items-center">
+        <form
+          onSubmit={handleSearchSubmit}
+          className="glass p-5 rounded-2xl border border-white/5 flex flex-col md:flex-row gap-4 items-center"
+        >
           <div className="relative flex-1 w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
             <input
@@ -107,7 +130,10 @@ export default function JobsPage() {
             <div className="relative flex-1 md:flex-none">
               <select
                 value={locationType}
-                onChange={(e) => { setLocationType(e.target.value); setPage(1); }}
+                onChange={(e) => {
+                  setLocationType(e.target.value)
+                  setPage(1)
+                }}
                 className="w-full bg-slate-900/40 border border-white/10 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-primary text-slate-300 appearance-none cursor-pointer pr-10"
               >
                 <option value="">Any Location</option>
@@ -120,7 +146,10 @@ export default function JobsPage() {
             <div className="relative flex-1 md:flex-none">
               <select
                 value={seniority}
-                onChange={(e) => { setSeniority(e.target.value); setPage(1); }}
+                onChange={(e) => {
+                  setSeniority(e.target.value)
+                  setPage(1)
+                }}
                 className="w-full bg-slate-900/40 border border-white/10 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-primary text-slate-300 appearance-none cursor-pointer pr-10"
               >
                 <option value="">Any Seniority</option>
@@ -146,7 +175,10 @@ export default function JobsPage() {
         {loading ? (
           <div className="flex flex-col gap-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-28 bg-white/[0.02] border border-white/5 rounded-2xl animate-pulse" />
+              <div
+                key={i}
+                className="h-28 bg-white/[0.02] border border-white/5 rounded-2xl animate-pulse"
+              />
             ))}
           </div>
         ) : jobs.length === 0 ? (
@@ -156,7 +188,8 @@ export default function JobsPage() {
             </div>
             <h3 className="text-xl font-bold font-display text-white">No openings found</h3>
             <p className="text-slate-400 text-sm max-w-md mx-auto leading-relaxed">
-              We couldn't find matches matching those filters. Try adjusting search terms or verify monitored companies.
+              We couldn&apos;t find matches matching those filters. Try adjusting search terms or
+              verify monitored companies.
             </p>
           </div>
         ) : (
@@ -195,7 +228,10 @@ export default function JobsPage() {
                   {job.skills && job.skills.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-1">
                       {job.skills.slice(0, 5).map((skill: string) => (
-                        <span key={skill} className="text-[10px] font-semibold text-slate-400 bg-white/5 border border-white/5 px-2 py-0.5 rounded">
+                        <span
+                          key={skill}
+                          className="text-[10px] font-semibold text-slate-400 bg-white/5 border border-white/5 px-2 py-0.5 rounded"
+                        >
                           {skill}
                         </span>
                       ))}

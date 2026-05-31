@@ -43,10 +43,7 @@ export class AuthService {
   async createInitialUser(email: string, password: string, name: string) {
     const passwordHash = await bcrypt.hash(password, 12)
 
-    const [user] = await this.db
-      .insert(users)
-      .values({ email, passwordHash, name })
-      .returning()
+    const [user] = await this.db.insert(users).values({ email, passwordHash, name }).returning()
 
     if (!user) throw new UnauthorizedException('User creation failed')
 

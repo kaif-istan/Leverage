@@ -11,7 +11,7 @@ export class IngestionService {
 
   constructor(
     @Inject(DRIZZLE_TOKEN) private readonly db: DrizzleDB,
-    private readonly embeddingService: EmbeddingService
+    private readonly embeddingService: EmbeddingService,
   ) {}
 
   /**
@@ -24,12 +24,7 @@ export class IngestionService {
       const [existing] = await this.db
         .select()
         .from(jobs)
-        .where(
-          and(
-            eq(jobs.companyId, companyId),
-            eq(jobs.externalId, crawled.externalId)
-          )
-        )
+        .where(and(eq(jobs.companyId, companyId), eq(jobs.externalId, crawled.externalId)))
         .limit(1)
 
       if (existing) {
@@ -83,14 +78,51 @@ export class IngestionService {
 
   private extractTaxonomyMatches(text: string): { skills: string[]; techStack: string[] } {
     const raw = text.toLowerCase()
-    
+
     // Core taxonomies mapped to regex matches
     const skillsList = [
-      'typescript', 'javascript', 'python', 'go', 'golang', 'rust', 'c++', 'c#', 'java', 'ruby',
-      'react', 'next.js', 'nextjs', 'vue', 'angular', 'nestjs', 'express', 'django', 'fastapi',
-      'postgresql', 'postgres', 'redis', 'mongodb', 'mysql', 'elasticsearch', 'cassandra',
-      'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'terraform', 'ci/cd', 'github actions',
-      'langchain', 'llamaindex', 'rag', 'openai', 'llm', 'vector databases', 'graphql', 'grpc'
+      'typescript',
+      'javascript',
+      'python',
+      'go',
+      'golang',
+      'rust',
+      'c++',
+      'c#',
+      'java',
+      'ruby',
+      'react',
+      'next.js',
+      'nextjs',
+      'vue',
+      'angular',
+      'nestjs',
+      'express',
+      'django',
+      'fastapi',
+      'postgresql',
+      'postgres',
+      'redis',
+      'mongodb',
+      'mysql',
+      'elasticsearch',
+      'cassandra',
+      'docker',
+      'kubernetes',
+      'aws',
+      'azure',
+      'gcp',
+      'terraform',
+      'ci/cd',
+      'github actions',
+      'langchain',
+      'llamaindex',
+      'rag',
+      'openai',
+      'llm',
+      'vector databases',
+      'graphql',
+      'grpc',
     ]
 
     const foundSkills = new Set<string>()
@@ -108,28 +140,53 @@ export class IngestionService {
     }
   }
 
-  private detectSeniority(title: string): 'junior' | 'mid' | 'senior' | 'staff' | 'lead' | 'manager' | 'unknown' {
+  private detectSeniority(
+    title: string,
+  ): 'junior' | 'mid' | 'senior' | 'staff' | 'lead' | 'manager' | 'unknown' {
     const raw = title.toLowerCase()
-    if (raw.includes('staff') || raw.includes('principal') || raw.includes('architect')) return 'staff'
-    if (raw.includes('manager') || raw.includes('director') || raw.includes('head')) return 'manager'
+    if (raw.includes('staff') || raw.includes('principal') || raw.includes('architect'))
+      return 'staff'
+    if (raw.includes('manager') || raw.includes('director') || raw.includes('head'))
+      return 'manager'
     if (raw.includes('lead') || raw.includes('tech lead')) return 'lead'
     if (raw.includes('senior') || raw.includes('sr.') || raw.includes('sr ')) return 'senior'
-    if (raw.includes('junior') || raw.includes('jr.') || raw.includes('associate') || raw.includes('intern')) return 'junior'
-    if (raw.includes('ii') || raw.includes('iii') || raw.includes('2') || raw.includes('3')) return 'mid'
+    if (
+      raw.includes('junior') ||
+      raw.includes('jr.') ||
+      raw.includes('associate') ||
+      raw.includes('intern')
+    )
+      return 'junior'
+    if (raw.includes('ii') || raw.includes('iii') || raw.includes('2') || raw.includes('3'))
+      return 'mid'
     return 'senior' // Default to senior for software engineer listings to be safe
   }
 
-  private detectLocationType(location: string, text: string): 'remote' | 'hybrid' | 'onsite' | 'unknown' {
+  private detectLocationType(
+    location: string,
+    text: string,
+  ): 'remote' | 'hybrid' | 'onsite' | 'unknown' {
     const rawLoc = location.toLowerCase()
     const rawText = text.toLowerCase()
 
-    if (rawLoc.includes('remote') || rawLoc.includes('anywhere') || rawLoc.includes('virtual')) return 'remote'
+    if (rawLoc.includes('remote') || rawLoc.includes('anywhere') || rawLoc.includes('virtual'))
+      return 'remote'
     if (rawLoc.includes('hybrid') || rawLoc.includes('flexible')) return 'hybrid'
     if (rawLoc.includes('onsite') || rawLoc.includes('office')) return 'onsite'
 
     // Look inside descriptions if location name is generic (e.g. "San Francisco, CA")
-    if (rawText.includes('hybrid role') || rawText.includes('hybrid work') || rawText.includes('days a week in office')) return 'hybrid'
-    if (rawText.includes('100% remote') || rawText.includes('fully remote') || rawText.includes('work from home')) return 'remote'
+    if (
+      rawText.includes('hybrid role') ||
+      rawText.includes('hybrid work') ||
+      rawText.includes('days a week in office')
+    )
+      return 'hybrid'
+    if (
+      rawText.includes('100% remote') ||
+      rawText.includes('fully remote') ||
+      rawText.includes('work from home')
+    )
+      return 'remote'
 
     return 'onsite'
   }

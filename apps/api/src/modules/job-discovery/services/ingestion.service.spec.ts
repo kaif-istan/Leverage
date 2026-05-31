@@ -68,7 +68,7 @@ describe('IngestionService', () => {
     it('should identify hybrid work schedules from descriptions', () => {
       const loc = service['detectLocationType'](
         'San Francisco, CA',
-        'This role is hybrid, requiring 3 days a week in office'
+        'This role is hybrid, requiring 3 days a week in office',
       )
       expect(loc).toBe('hybrid')
     })
@@ -76,7 +76,8 @@ describe('IngestionService', () => {
 
   describe('extractTaxonomyMatches', () => {
     it('should successfully match skills in text against core taxonomy regexes', () => {
-      const description = 'We are looking for a Senior Developer experienced in TypeScript, React, PostgreSQL, and AWS.'
+      const description =
+        'We are looking for a Senior Developer experienced in TypeScript, React, PostgreSQL, and AWS.'
       const matches = service['extractTaxonomyMatches'](description)
 
       expect(matches.skills).toContain('Typescript')

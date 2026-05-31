@@ -23,10 +23,6 @@ import { ProbeWorker } from './workers/probe.worker'
     CompanyDiscoveryOrchestrator,
     ProbeWorker,
   ],
-  exports: [
-    PlatformProbeService,
-    SeedLoaderService,
-    CompanyDiscoveryOrchestrator,
-  ],
+  exports: [PlatformProbeService, SeedLoaderService, CompanyDiscoveryOrchestrator],
 })
 export class CompanyDiscoveryModule {}

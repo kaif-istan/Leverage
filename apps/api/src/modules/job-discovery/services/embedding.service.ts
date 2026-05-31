@@ -25,12 +25,14 @@ export class EmbeddingService {
           model: this.modelName,
           prompt: text.slice(0, 8000), // Safety check context window
         },
-        { timeout: 8000 }
+        { timeout: 8000 },
       )
       return response.data.embedding
     } catch (err: any) {
-      this.logger.warn(`Ollama /api/embeddings failed, attempting legacy /api/embed fallback: ${err.message}`)
-      
+      this.logger.warn(
+        `Ollama /api/embeddings failed, attempting legacy /api/embed fallback: ${err.message}`,
+      )
+
       try {
         const response = await axios.post(
           `${this.baseUrl}/api/embed`,
@@ -38,7 +40,7 @@ export class EmbeddingService {
             model: this.modelName,
             input: [text.slice(0, 8000)],
           },
-          { timeout: 8000 }
+          { timeout: 8000 },
         )
         return response.data.embeddings[0]
       } catch (fallbackErr: any) {
@@ -54,7 +56,7 @@ export class EmbeddingService {
    */
   async getEmbeddingsBatch(texts: string[]): Promise<number[][]> {
     this.logger.log(`Generating batch embeddings for ${texts.length} items using local Ollama...`)
-    
+
     try {
       const response = await axios.post(
         `${this.baseUrl}/api/embed`,
@@ -62,7 +64,7 @@ export class EmbeddingService {
           model: this.modelName,
           input: texts.map((t) => t.slice(0, 8000)),
         },
-        { timeout: 30000 }
+        { timeout: 30000 },
       )
       return response.data.embeddings
     } catch (err: any) {

@@ -17,10 +17,6 @@ import { ScraperOrchestrator } from './services/scraper-orchestrator.service'
     IngestionService,
     ScraperOrchestrator,
   ],
-  exports: [
-    EmbeddingService,
-    IngestionService,
-    ScraperOrchestrator,
-  ],
+  exports: [EmbeddingService, IngestionService, ScraperOrchestrator],
 })
 export class JobDiscoveryModule {}

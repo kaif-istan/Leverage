@@ -38,14 +38,14 @@ describe('PlatformProbeService', () => {
   describe('probeSlug', () => {
     it('should confirm Greenhouse ATS platform if boards URL returns 200', async () => {
       mockedAxios.head.mockResolvedValueOnce({ status: 200 }) // Greenhouse HEAD succeeds
-      
+
       const result = await service.probe('Stripe')
       expect(result).not.toBeNull()
       expect(result?.platform).toBe('greenhouse')
       expect(result?.slug).toBe('stripe')
       expect(mockedAxios.head).toHaveBeenCalledWith(
         'https://boards.greenhouse.io/stripe',
-        expect.any(Object)
+        expect.any(Object),
       )
     })
 

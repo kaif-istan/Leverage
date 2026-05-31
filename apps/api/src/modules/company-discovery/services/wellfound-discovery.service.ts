@@ -14,7 +14,7 @@ export class WellfoundDiscoveryService {
    */
   async scrapeWellfoundDirectory(): Promise<number> {
     this.logger.log('Scraping Wellfound software startups directory...')
-    
+
     // Curated high-growth startups often active on Wellfound
     const targetStartups = [
       { name: 'Vercel', website: 'vercel.com' },
@@ -29,7 +29,7 @@ export class WellfoundDiscoveryService {
       { name: 'Railway', website: 'railway.app' },
       { name: 'Dub.co', website: 'dub.co' },
       { name: 'Koyeb', website: 'koyeb.com' },
-      { name: 'Neon', website: 'neon.tech' }
+      { name: 'Neon', website: 'neon.tech' },
     ]
 
     let added = 0

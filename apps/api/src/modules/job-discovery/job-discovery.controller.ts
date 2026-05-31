@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Param, Query, UseGuards, HttpCode, HttpStatus, Inject } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Query,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  Inject,
+} from '@nestjs/common'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { DRIZZLE_TOKEN, type DrizzleDB } from '../../database/database.module'
 import { jobs, companies } from '../../database/schema'
@@ -10,7 +20,7 @@ import { eq, desc, and, or, sql } from 'drizzle-orm'
 export class JobDiscoveryController {
   constructor(
     @Inject(DRIZZLE_TOKEN) private readonly db: DrizzleDB,
-    private readonly scraperOrchestrator: ScraperOrchestrator
+    private readonly scraperOrchestrator: ScraperOrchestrator,
   ) {}
 
   @Get()
@@ -19,7 +29,7 @@ export class JobDiscoveryController {
     @Query('limit') limit = 20,
     @Query('search') search?: string,
     @Query('locationType') locationType?: 'remote' | 'hybrid' | 'onsite',
-    @Query('seniority') seniority?: string
+    @Query('seniority') seniority?: string,
   ) {
     const offset = (page - 1) * limit
     const conditions: any[] = []
@@ -36,8 +46,8 @@ export class JobDiscoveryController {
       conditions.push(
         or(
           sql`lower(${jobs.title}) LIKE ${'%' + search.toLowerCase() + '%'}`,
-          sql`lower(${jobs.descriptionText}) LIKE ${'%' + search.toLowerCase() + '%'}`
-        )
+          sql`lower(${jobs.descriptionText}) LIKE ${'%' + search.toLowerCase() + '%'}`,
+        ),
       )
     }
 

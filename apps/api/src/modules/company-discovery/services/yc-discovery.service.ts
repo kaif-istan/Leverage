@@ -49,7 +49,7 @@ export class YcDiscoveryService {
       for (const company of hits) {
         const name = company.name
         const website = company.website || ''
-        
+
         // Skip empty names
         if (!name) continue
 

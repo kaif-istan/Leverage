@@ -12,7 +12,7 @@ export class ProbeWorker extends WorkerHost {
 
   constructor(
     @Inject(DRIZZLE_TOKEN) private readonly db: DrizzleDB,
-    private readonly probeService: PlatformProbeService
+    private readonly probeService: PlatformProbeService,
   ) {
     super()
   }
@@ -42,7 +42,9 @@ export class ProbeWorker extends WorkerHost {
       const result = await this.probeService.probe(item.companyName, item.websiteUrl || undefined)
 
       if (result) {
-        this.logger.log(`🎉 Found platform for ${item.companyName}: ${result.platform} (${result.slug})`)
+        this.logger.log(
+          `🎉 Found platform for ${item.companyName}: ${result.platform} (${result.slug})`,
+        )
 
         // Update queue to confirmed
         await this.db
@@ -79,11 +81,11 @@ export class ProbeWorker extends WorkerHost {
               monitoringEnabledAt: new Date(),
               probeStatus: 'confirmed',
               probeLastAttemptedAt: new Date(),
-            }
+            },
           })
       } else {
         this.logger.log(`❌ No platform identified for ${item.companyName}`)
-        
+
         const attempts = item.probeAttempts + 1
         const maxAttempts = 3
         const status = attempts >= maxAttempts ? 'failed' : 'pending'
@@ -94,7 +96,8 @@ export class ProbeWorker extends WorkerHost {
             status,
             probeAttempts: attempts,
             lastProbeAt: new Date(),
-            nextProbeAt: status === 'pending' ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) : null, // 7 days fallback
+            nextProbeAt:
+              status === 'pending' ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) : null, // 7 days fallback
             updatedAt: new Date(),
           })
           .where(eq(discoveredCompaniesQueue.id, queueId))

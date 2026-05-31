@@ -16,7 +16,7 @@ export class CompanyDiscoveryOrchestrator {
     @Inject(DRIZZLE_TOKEN) private readonly db: DrizzleDB,
     private readonly ycService: YcDiscoveryService,
     private readonly wellfoundService: WellfoundDiscoveryService,
-    @InjectQueue('probe-queue') private readonly probeQueue: Queue
+    @InjectQueue('probe-queue') private readonly probeQueue: Queue,
   ) {}
 
   /**
@@ -66,9 +66,9 @@ export class CompanyDiscoveryOrchestrator {
             eq(discoveredCompaniesQueue.status, 'pending'),
             or(
               isNull(discoveredCompaniesQueue.nextProbeAt),
-              lte(discoveredCompaniesQueue.nextProbeAt, new Date())
-            )
-          )
+              lte(discoveredCompaniesQueue.nextProbeAt, new Date()),
+            ),
+          ),
         )
         .limit(100)
 
@@ -87,7 +87,7 @@ export class CompanyDiscoveryOrchestrator {
             attempts: 3,
             backoff: { type: 'exponential', delay: 10000 },
             removeOnComplete: true,
-          }
+          },
         )
       }
 

@@ -16,7 +16,9 @@ const mockDrizzle = {
   insert: jest.fn().mockReturnThis(),
   values: jest.fn().mockReturnThis(),
   onConflictDoNothing: jest.fn().mockReturnThis(),
-  returning: jest.fn().mockResolvedValue([{ id: 'mock-user-uuid', email: 'test@user.com', name: 'Test User' }]),
+  returning: jest
+    .fn()
+    .mockResolvedValue([{ id: 'mock-user-uuid', email: 'test@user.com', name: 'Test User' }]),
 }
 
 const mockJwtService = {
@@ -57,7 +59,9 @@ describe('AuthService', () => {
     })
 
     it('should return null if password compare fails', async () => {
-      mockDrizzle.limit.mockResolvedValueOnce([{ id: 'user-id', email: 'test@user.com', passwordHash: 'hashed-pwd' }])
+      mockDrizzle.limit.mockResolvedValueOnce([
+        { id: 'user-id', email: 'test@user.com', passwordHash: 'hashed-pwd' },
+      ])
       mockedBcrypt.compare.mockImplementationOnce(() => Promise.resolve(false)) // pwd mismatch
 
       const result = await service.validateUser('test@user.com', 'wrongpassword')
@@ -65,7 +69,12 @@ describe('AuthService', () => {
     })
 
     it('should return user record if password matches successfully', async () => {
-      const userRecord = { id: 'user-id', email: 'test@user.com', passwordHash: 'hashed-pwd', name: 'Test User' }
+      const userRecord = {
+        id: 'user-id',
+        email: 'test@user.com',
+        passwordHash: 'hashed-pwd',
+        name: 'Test User',
+      }
       mockDrizzle.limit.mockResolvedValueOnce([userRecord])
       mockedBcrypt.compare.mockImplementationOnce(() => Promise.resolve(true)) // correct pwd
 
@@ -78,7 +87,7 @@ describe('AuthService', () => {
   describe('login', () => {
     it('should sign jwt payload and return clean LoginResponse object', async () => {
       const result = await service.login('user-id', 'test@user.com', 'Test User')
-      
+
       expect(result.accessToken).toBe('mock-jwt-token-string')
       expect(result.user.id).toBe('user-id')
       expect(result.user.email).toBe('test@user.com')

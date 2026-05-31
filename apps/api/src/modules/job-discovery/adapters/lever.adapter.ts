@@ -23,8 +23,10 @@ export class LeverAdapter {
         // Lever structure: combines description, lists, and closing
         const htmlContent = [
           post.description || '',
-          post.lists?.map((list: any) => `<h3>${list.text}</h3><ul>${list.content}</ul>`).join('') || '',
-          post.additional || ''
+          post.lists
+            ?.map((list: any) => `<h3>${list.text}</h3><ul>${list.content}</ul>`)
+            .join('') || '',
+          post.additional || '',
         ].join('\n')
 
         const cleanText = htmlContent

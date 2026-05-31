@@ -10,13 +10,10 @@ export function createWinstonLogger() {
     printf(({ level, message, timestamp, context }) => {
       const ctx = context ? ` [${context}]` : ''
       return `${timestamp} ${level}:${ctx} ${message}`
-    })
+    }),
   )
 
-  const jsonFormat = combine(
-    timestamp(),
-    json()
-  )
+  const jsonFormat = combine(timestamp(), json())
 
   const isProduction = process.env['NODE_ENV'] === 'production'
 

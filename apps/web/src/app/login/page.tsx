@@ -72,7 +72,9 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             {isRegister && (
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Full Name</label>
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  Full Name
+                </label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
                   <input
@@ -88,7 +90,9 @@ export default function LoginPage() {
             )}
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email Address</label>
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Email Address
+              </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
                 <input
@@ -103,7 +107,9 @@ export default function LoginPage() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Password</label>
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Password
+              </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
                 <input
@@ -152,7 +158,7 @@ export default function LoginPage() {
               </p>
             ) : (
               <p>
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <button
                   type="button"
                   onClick={() => {
