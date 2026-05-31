@@ -95,11 +95,32 @@ export default function CompaniesSettingsPage() {
     setMessage(null)
 
     try {
-      await api.post(`/jobs/scrape/${companyId}`, {})
-      setMessage({
-        type: 'success',
-        text: `🎉 Successfully crawled and synced active job listings for ${name}!`,
-      })
+      const res: any = await api.post(`/jobs/scrape/${companyId}`, {})
+
+      if (res.success) {
+        if (res.jobsFound === 0) {
+          setMessage({
+            type: 'success',
+            text: `⚠️ Scrape completed for ${name}, but found 0 active job postings on their board.`,
+          })
+        } else if (res.jobsNew === 0) {
+          setMessage({
+            type: 'success',
+            text: `ℹ️ Sync completed for ${name}. Found ${res.jobsFound} active jobs, but all were already present in your database (0 new additions).`,
+          })
+        } else {
+          setMessage({
+            type: 'success',
+            text: `🎉 Sync completed for ${name}! Crawled ${res.jobsFound} active jobs, successfully ingested ${res.jobsNew} new roles.`,
+          })
+        }
+      } else {
+        setMessage({
+          type: 'error',
+          text: `❌ Sync failed for ${name}: ${res.errorMessage || 'Unknown error occurred.'}`,
+        })
+      }
+
       // Refresh the stats too
       const statsData: any = await api.get('/companies/stats')
       setStats(statsData || null)
