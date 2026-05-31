@@ -1,2 +1,19 @@
 #!/bin/sh
+echo "🔍 Running pre-commit validation checks..."
+
+# 1. Run lint-staged for style, typing, and unit test checks
 pnpm lint-staged
+if [ $? -ne 0 ]; then
+  echo "❌ Pre-commit validation checks failed!"
+  exit 1
+fi
+
+# 2. Run incremental build check via Turborepo to ensure bundling compiles cleanly
+echo "🏗️  Running incremental build verification..."
+pnpm turbo run build
+if [ $? -ne 0 ]; then
+  echo "❌ Build verification failed! Please fix bundling errors before committing."
+  exit 1
+fi
+
+echo "✅ All pre-commit checks passed!"

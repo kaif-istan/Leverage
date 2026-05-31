@@ -43,7 +43,9 @@ export class ScraperOrchestrator {
   /**
    * Scrapes jobs for a single company.
    */
-  async scrapeCompanyJobs(companyId: string) {
+  async scrapeCompanyJobs(
+    companyId: string,
+  ): Promise<{ success: boolean; jobsFound: number; jobsNew: number; errorMessage?: string }> {
     const [company] = await this.db
       .select()
       .from(companies)
@@ -52,13 +54,18 @@ export class ScraperOrchestrator {
 
     if (!company) {
       this.logger.warn(`Could not scrape company ${companyId}: Not found.`)
-      return
+      return { success: false, jobsFound: 0, jobsNew: 0, errorMessage: 'Company not found' }
     }
 
     const atsSlug = company.atsSlug || company.slug
     if (!atsSlug) {
       this.logger.warn(`Could not scrape company ${companyId}: Missing ATS slug.`)
-      return
+      return {
+        success: false,
+        jobsFound: 0,
+        jobsNew: 0,
+        errorMessage: 'Missing ATS slug configuration',
+      }
     }
 
     this.logger.log(
@@ -93,7 +100,12 @@ export class ScraperOrchestrator {
 
     if (!source) {
       this.logger.error(`Unable to find or create job source for ${company.atsPlatform}`)
-      return
+      return {
+        success: false,
+        jobsFound: 0,
+        jobsNew: 0,
+        errorMessage: 'Could not create or find job source configuration',
+      }
     }
 
     const logId = await this.logScrapeStart(company.id, source.id)
@@ -113,14 +125,16 @@ export class ScraperOrchestrator {
 
       let successCount = 0
       for (const job of crawledJobs) {
-        await this.ingestion.ingestJob(job, company.id, source.id)
-        successCount++
+        const isNew = await this.ingestion.ingestJob(job, company.id, source.id)
+        if (isNew) successCount++
       }
 
       await this.logScrapeSuccess(logId, crawledJobs.length, successCount)
+      return { success: true, jobsFound: crawledJobs.length, jobsNew: successCount }
     } catch (err: any) {
       this.logger.error(`Failed crawling company ${company.name}: ${err.message}`, err.stack)
       await this.logScrapeFailure(logId, err.message)
+      return { success: false, jobsFound: 0, jobsNew: 0, errorMessage: err.message }
     }
   }
 

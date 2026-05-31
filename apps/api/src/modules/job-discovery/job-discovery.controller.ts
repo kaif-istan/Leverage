@@ -123,10 +123,6 @@ export class JobDiscoveryController {
   @Post('scrape/:companyId')
   @HttpCode(HttpStatus.OK)
   async scrapeCompany(@Param('companyId') companyId: string) {
-    await this.scraperOrchestrator.scrapeCompanyJobs(companyId)
-    return {
-      success: true,
-      message: 'Scrape triggered successfully for target company.',
-    }
+    return this.scraperOrchestrator.scrapeCompanyJobs(companyId)
   }
 }

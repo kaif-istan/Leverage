@@ -18,7 +18,7 @@ export class IngestionService {
    * Processes a crawled job through Stage 1 pipeline:
    * Deduplication -> Normalization -> Taxonomy Extraction -> Vector Embedding -> DB Insert.
    */
-  async ingestJob(crawled: CrawledJob, companyId: string, sourceId: string) {
+  async ingestJob(crawled: CrawledJob, companyId: string, sourceId: string): Promise<boolean> {
     try {
       // 1. Deduplication Check
       const [existing] = await this.db
@@ -29,7 +29,7 @@ export class IngestionService {
 
       if (existing) {
         // Job already exists, let's skip to avoid duplicates
-        return
+        return false
       }
 
       // 2. Skill & Tech Extraction Heuristics (Regex matching)
@@ -71,8 +71,10 @@ export class IngestionService {
       })
 
       this.logger.log(`Successfully ingested job: ${crawled.title} (${crawled.location})`)
+      return true
     } catch (err: any) {
       this.logger.error(`Failed to ingest job ${crawled.title}: ${err.message}`, err.stack)
+      return false
     }
   }
 
