@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Calendar,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react'
 import api from '@/lib/api'
 
@@ -23,8 +24,9 @@ export default function JobsPage() {
   const [search, setSearch] = useState('')
   const [locationType, setLocationType] = useState('')
   const [seniority, setSeniority] = useState('')
+  const [sort, setSort] = useState('opportunityScore')
   const [page, setPage] = useState(1)
-  const [scrapingCompany, setScrapingCompany] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
 
   const fetchJobs = async () => {
     setLoading(true)
@@ -35,6 +37,7 @@ export default function JobsPage() {
           search,
           locationType,
           seniority,
+          sort,
           limit: 15,
         },
       })
@@ -49,7 +52,7 @@ export default function JobsPage() {
 
   useEffect(() => {
     fetchJobs()
-  }, [page, locationType, seniority])
+  }, [page, locationType, seniority, sort])
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,8 +60,20 @@ export default function JobsPage() {
     fetchJobs()
   }
 
+  const handleGlobalRefresh = async () => {
+    setRefreshing(true)
+    try {
+      await api.post('/jobs/recompute-ranks')
+      await fetchJobs()
+    } catch (err) {
+      console.error('Failed to recompute global ranks:', err)
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="min-h-screen bg-slate-950 flex flex-col relative overflow-hidden">
       {/* Dynamic Background lights */}
       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[150px] pointer-events-none" />
 
@@ -86,6 +101,12 @@ export default function JobsPage() {
             Monitored Startups
           </Link>
           <Link
+            href="/settings/preferences"
+            className="text-slate-400 hover:text-white transition-colors text-sm font-medium flex items-center gap-1"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-primary" /> Match Weights
+          </Link>
+          <Link
             href="/"
             className="text-slate-400 hover:text-white transition-colors text-sm font-medium"
           >
@@ -99,14 +120,24 @@ export default function JobsPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight font-display bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-300">
-              Job Discovery Board
+              Personalized Recommendations
             </h1>
             <p className="text-slate-400 text-sm mt-1">
-              Active openings crawled directly from monitored startup boards.
+              Active startup roles ranked by your strategic career Opportunity Score.
             </p>
           </div>
-          <div className="text-xs bg-slate-900 border border-white/5 px-4 py-2 rounded-xl text-slate-400">
-            Total active listings: <span className="font-semibold text-primary">{total}</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleGlobalRefresh}
+              disabled={refreshing}
+              className="bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs px-4 py-2 rounded-xl transition-all flex items-center gap-2 font-semibold disabled:opacity-40"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+              {refreshing ? 'Re-scoring Feed...' : 'Sync Ranks'}
+            </button>
+            <div className="text-xs bg-slate-900 border border-white/5 px-4 py-2.5 rounded-xl text-slate-400">
+              Total active listings: <span className="font-semibold text-primary">{total}</span>
+            </div>
           </div>
         </div>
 
@@ -126,7 +157,7 @@ export default function JobsPage() {
             />
           </div>
 
-          <div className="flex gap-4 w-full md:w-auto">
+          <div className="flex flex-wrap md:flex-nowrap gap-4 w-full md:w-auto">
             <div className="relative flex-1 md:flex-none">
               <select
                 value={locationType}
@@ -162,6 +193,22 @@ export default function JobsPage() {
               </select>
             </div>
 
+            <div className="relative flex-1 md:flex-none">
+              <select
+                value={sort}
+                onChange={(e) => {
+                  setSort(e.target.value)
+                  setPage(1)
+                }}
+                className="w-full bg-slate-900/40 border border-white/10 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-primary text-slate-300 appearance-none cursor-pointer pr-10"
+              >
+                <option value="opportunityScore">Sort: Opportunity Score</option>
+                <option value="overallScore">Sort: Match Score</option>
+                <option value="postedAt">Sort: Date Posted</option>
+                <option value="salary">Sort: Highest Salary</option>
+              </select>
+            </div>
+
             <button
               type="submit"
               className="bg-primary hover:bg-primary/95 text-white font-semibold py-3 px-6 rounded-xl text-sm transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 flex items-center gap-2"
@@ -194,66 +241,105 @@ export default function JobsPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {jobs.map((job) => (
-              <div
-                key={job.id}
-                className="glass-card p-6 rounded-2xl border border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
-              >
-                <div className="flex flex-col gap-3 flex-1">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-primary bg-primary/10 border border-primary/20 px-3 py-1 rounded-lg">
-                      {job.company?.name || 'Company'}
-                    </span>
-                    <span className="text-xs text-slate-500 capitalize bg-slate-900 px-2 py-1 rounded border border-white/5">
-                      {job.locationType}
-                    </span>
-                    <span className="text-xs text-slate-500 capitalize bg-slate-900 px-2 py-1 rounded border border-white/5">
-                      {job.seniority}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-bold font-display text-white hover:text-primary transition-colors">
-                    <Link href={`/jobs/${job.id}`}>{job.title}</Link>
-                  </h3>
-                  <div className="flex items-center gap-4 text-xs text-slate-400">
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-slate-500" />
-                      {job.location}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5 text-slate-500" />
-                      Posted {new Date(job.postedAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  {/* Extracted Skills */}
-                  {job.skills && job.skills.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-1">
-                      {job.skills.slice(0, 5).map((skill: string) => (
+            {jobs.map((job) => {
+              const hasOppScore =
+                job.opportunityScore !== undefined && job.opportunityScore !== null
+              const hasMatchScore = job.matchScore !== undefined && job.matchScore !== null
+              const isExcellentOpp = hasOppScore && job.opportunityScore >= 85
+
+              return (
+                <div
+                  key={job.id}
+                  className={`glass-card p-6 rounded-2xl border transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-6 ${
+                    isExcellentOpp
+                      ? 'border-emerald-500/20 shadow-lg shadow-emerald-500/[0.02]'
+                      : 'border-white/5'
+                  }`}
+                >
+                  <div className="flex flex-col gap-3 flex-1">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="text-sm font-bold text-primary bg-primary/10 border border-primary/20 px-3 py-1 rounded-lg">
+                        {job.company?.name || 'Company'}
+                      </span>
+                      <span className="text-xs text-slate-500 capitalize bg-slate-900 px-2 py-1 rounded border border-white/5">
+                        {job.locationType}
+                      </span>
+                      <span className="text-xs text-slate-500 capitalize bg-slate-900 px-2 py-1 rounded border border-white/5">
+                        {job.seniorityLevel}
+                      </span>
+
+                      {/* Opportunity Score Badge */}
+                      {hasOppScore && (
                         <span
-                          key={skill}
-                          className="text-[10px] font-semibold text-slate-400 bg-white/5 border border-white/5 px-2 py-0.5 rounded"
+                          className={`text-xs font-extrabold px-2.5 py-1 rounded-lg border font-display flex items-center gap-1 shadow-md transition-all ${
+                            isExcellentOpp
+                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 animate-pulse shadow-emerald-500/5'
+                              : 'bg-primary/10 border-primary/20 text-primary'
+                          }`}
                         >
-                          {skill}
+                          ★ {job.opportunityScore} Opp Score
                         </span>
-                      ))}
-                      {job.skills.length > 5 && (
-                        <span className="text-[10px] font-semibold text-primary bg-primary/5 border border-primary/10 px-2 py-0.5 rounded">
-                          +{job.skills.length - 5} more
+                      )}
+
+                      {/* Match Score Badge */}
+                      {hasMatchScore && (
+                        <span className="text-xs font-semibold px-2 py-1 rounded border border-white/5 bg-slate-900 text-slate-400">
+                          {Math.round(job.matchScore * 100)}% Match
                         </span>
                       )}
                     </div>
-                  )}
-                </div>
+                    <h3 className="text-lg font-bold font-display text-white hover:text-primary transition-colors">
+                      <Link href={`/jobs/${job.id}`}>{job.title}</Link>
+                    </h3>
+                    <div className="flex items-center gap-4 text-xs text-slate-400">
+                      <span className="flex items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5 text-slate-500" />
+                        {job.location}
+                      </span>
+                      {job.salaryMin && (
+                        <span className="text-slate-300 font-semibold bg-white/5 border border-white/5 px-2 py-0.5 rounded">
+                          {job.salaryCurrency === 'INR' ? '₹' : '$'}
+                          {(job.salaryMin / 100000).toFixed(0)}L -{' '}
+                          {(job.salaryMax / 100000).toFixed(0)}L
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="h-3.5 w-3.5 text-slate-500" />
+                        Posted {new Date(job.postedAt).toLocaleDateString()}
+                      </span>
+                    </div>
 
-                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-                  <Link
-                    href={`/jobs/${job.id}`}
-                    className="bg-white/5 hover:bg-white/10 border border-white/10 font-semibold px-5 py-2.5 rounded-xl text-sm transition-all text-center flex items-center gap-1.5 w-full md:w-auto"
-                  >
-                    View Description <ChevronRight className="h-4 w-4" />
-                  </Link>
+                    {/* Extracted Skills */}
+                    {job.requiredSkills && job.requiredSkills.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {job.requiredSkills.slice(0, 5).map((skill: string) => (
+                          <span
+                            key={skill}
+                            className="text-[10px] font-semibold text-slate-400 bg-white/5 border border-white/5 px-2 py-0.5 rounded"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                        {job.requiredSkills.length > 5 && (
+                          <span className="text-[10px] font-semibold text-primary bg-primary/5 border border-primary/10 px-2 py-0.5 rounded">
+                            +{job.requiredSkills.length - 5} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                    <Link
+                      href={`/jobs/${job.id}`}
+                      className="bg-white/5 hover:bg-white/10 border border-white/10 font-semibold px-5 py-2.5 rounded-xl text-sm transition-all text-center flex items-center gap-1.5 w-full md:w-auto"
+                    >
+                      View Details & Match <ChevronRight className="h-4 w-4" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
 

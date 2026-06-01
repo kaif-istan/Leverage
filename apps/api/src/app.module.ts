@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module'
 import { HealthModule } from './modules/health/health.module'
 import { CompanyDiscoveryModule } from './modules/company-discovery/company-discovery.module'
 import { JobDiscoveryModule } from './modules/job-discovery/job-discovery.module'
+import { JobModule } from './modules/job/job.module'
 import appConfig from './config/app.config'
 import databaseConfig from './config/database.config'
 import redisConfig from './config/redis.config'
@@ -79,6 +80,7 @@ import ollamaConfig from './config/ollama.config'
     HealthModule,
     CompanyDiscoveryModule,
     JobDiscoveryModule,
+    JobModule,
   ],
 })
 export class AppModule {}
